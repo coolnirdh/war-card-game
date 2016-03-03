@@ -20,104 +20,111 @@ import static org.junit.Assert.fail;
  * Created by Nirdh on 03-03-2016.
  */
 public class DeckTest {
-	private Deck deck;
+	private Deck standardDeck;
+	private Deck miniDeck;
 
 	@Before
 	public void setUp() {
-		deck = new Deck();
+		standardDeck = new Deck();
+		miniDeck = new Deck(ImmutableList.of(
+				new Card(Rank.ACE, Suit.SPADES),
+				new Card(Rank.KING, Suit.CLUBS),
+				new Card(Rank.QUEEN, Suit.HEARTS),
+				new Card(Rank.JACK, Suit.DIAMONDS)
+		));
 	}
 
 	@Test
 	public void thereAreExactly52CardsInTheDeck() {
-		assertThat(deck.listAllCards(), hasSize(52));
+		assertThat(standardDeck.listAllCards(), hasSize(52));
 	}
 
 	@Test
 	public void deckHasExactly26CardsOfEachColor() {
 		for (Color theColor : Color.values()) {
-			assertThat(deck.listCardsByColor(theColor), hasSize(26));
+			assertThat(standardDeck.listCardsByColor(theColor), hasSize(26));
 		}
 	}
 
 	@Test
 	public void deckHasExactly13CardsOfEachSuit() {
 		for (Suit theSuit : Suit.values()) {
-			assertThat(deck.listCardsBySuit(theSuit), hasSize(13));
+			assertThat(standardDeck.listCardsBySuit(theSuit), hasSize(13));
 		}
 	}
 
 	@Test
 	public void deckHasExactly4CardsOfEachRank() {
 		for (Rank theRank : Rank.values()) {
-			assertThat(deck.listCardsByRank(theRank), hasSize(4));
+			assertThat(standardDeck.listCardsByRank(theRank), hasSize(4));
 		}
 	}
 
 	@Test
 	public void shufflingOfDeckIsRandom() {
-		ImmutableList<Card> orderOfCardsBeforeShuffling = deck.listAllCards();
-		deck.shuffle();
-		ImmutableList<Card> orderOfCardsAfterShuffling = deck.listAllCards();
+		ImmutableList<Card> orderOfCardsBeforeShuffling = miniDeck.listAllCards();
+		miniDeck.shuffle();
+		ImmutableList<Card> orderOfCardsAfterShuffling = miniDeck.listAllCards();
 		assertThat(orderOfCardsBeforeShuffling, is(not(orderOfCardsAfterShuffling)));
 	}
 
 	@Test
 	public void cardDrawnFromDeckDoesNotExistAfterwards() {
-		deck.shuffle();
-		Card theCard = deck.drawCard();
-		assertThat(deck.listAllCards(), not(hasItem(theCard)));
-		assertThat(deck.size(), is(51));
+		standardDeck.shuffle();
+		Card theCard = standardDeck.drawCard();
+		assertThat(standardDeck.listAllCards(), not(hasItem(theCard)));
+		assertThat(standardDeck.size(), is(51));
 	}
 
 	@Test
 	public void cardReturnedToDeckExistsAfterwards() {
-		deck.shuffle();
-		Card theCard = deck.drawCard();
-		assertThat(deck.listAllCards(), not(hasItem(theCard)));
+		standardDeck.shuffle();
+		Card theCard = standardDeck.drawCard();
+		assertThat(standardDeck.listAllCards(), not(hasItem(theCard)));
 
-		deck.returnCard(theCard);
-		assertThat(deck.listAllCards(), hasItem(theCard));
+		standardDeck.returnCard(theCard);
+		assertThat(standardDeck.listAllCards(), hasItem(theCard));
 	}
 
 	@Test
 	public void allCardsCanBeDrawn() {
-		deck.shuffle();
-		while (deck.hasMoreCards()) {
-			deck.drawCard();
+		standardDeck.shuffle();
+		while (standardDeck.hasMoreCards()) {
+			standardDeck.drawCard();
 		}
-		assertThat(deck.listAllCards(), hasSize(0));
+		assertThat(standardDeck.listAllCards(), hasSize(0));
 	}
 
 	@Test
 	public void allCardsCanBeReturned() {
 		List<Card> cardsDrawn = new ArrayList<Card>();
-		deck.shuffle();
-		while (deck.hasMoreCards()) {
-			cardsDrawn.add(deck.drawCard());
+		standardDeck.shuffle();
+		while (standardDeck.hasMoreCards()) {
+			cardsDrawn.add(standardDeck.drawCard());
 		}
-		assertThat(deck.listAllCards(), hasSize(0));
+		assertThat(standardDeck.listAllCards(), hasSize(0));
 
 		for (Card theCard : cardsDrawn) {
-			deck.returnCard(theCard);
+			standardDeck.returnCard(theCard);
 		}
-		assertThat(deck.listAllCards(), hasSize(52));
+		assertThat(standardDeck.listAllCards(), hasSize(52));
 	}
 
 	@Test(expected = EmptyDeckException.class)
 	public void cardCannotBeDrawnWhenDeckIsEmpty() {
-		deck.shuffle();
-		while (deck.hasMoreCards()) {
-			deck.drawCard();
+		miniDeck.shuffle();
+		while (miniDeck.hasMoreCards()) {
+			miniDeck.drawCard();
 		}
-		assertThat(deck.listAllCards(), hasSize(0));
+		assertThat(miniDeck.listAllCards(), hasSize(0));
 
-		deck.drawCard();
+		miniDeck.drawCard();
 		fail();
 	}
 
 	@Test(expected = DuplicateCardException.class)
 	public void cardCannotBeAddedToDeckWhenItAlreadyExists() {
-		deck.returnCard(new Card(Rank.ACE, Suit.SPADES));
+		miniDeck.returnCard(new Card(Rank.ACE, Suit.SPADES));
 		fail();
 	}
 }

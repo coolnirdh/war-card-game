@@ -25,6 +25,11 @@ public class Deck {
 		}
 	}
 
+	public Deck(List<Card> theCollectionOfCards) {
+		collectionOfCards.clear();
+		collectionOfCards.addAll(theCollectionOfCards);
+	}
+
 	public void shuffle() {
 		Collections.shuffle(collectionOfCards);
 	}
