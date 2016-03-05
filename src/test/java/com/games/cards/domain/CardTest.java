@@ -16,6 +16,7 @@ public class CardTest {
 	public void spadesIsHigherThanHearts() {
 		Card theCard = new Card(Rank.ACE, Suit.SPADES);
 		Card anotherCard = new Card(Rank.ACE, Suit.HEARTS);
+		assertThat(theCard.compareTo(anotherCard), is(greaterThan(0)));
 	}
 
 	@Test
