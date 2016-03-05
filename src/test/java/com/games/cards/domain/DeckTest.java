@@ -18,8 +18,8 @@ public class DeckTest extends HandTest {
 
 	@Before
 	public void setUp() {
+		super.setUp();
 		deck = new Deck();
-		this.setEmptyHand(new Hand());
 		this.setNonEmptyHand(deck);
 	}
 

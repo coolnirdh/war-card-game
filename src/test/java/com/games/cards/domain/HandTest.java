@@ -22,13 +22,10 @@ import static org.junit.Assert.fail;
 public class HandTest {
 	private Hand nonEmptyHand;
 	private Hand emptyHand;
+	private List<Card> cardsToBeMerged;
 
 	public void setNonEmptyHand(Hand nonEmptyHand) {
 		this.nonEmptyHand = nonEmptyHand;
-	}
-
-	public void setEmptyHand(Hand emptyHand) {
-		this.emptyHand = emptyHand;
 	}
 
 	@Before
@@ -40,16 +37,17 @@ public class HandTest {
 		));
 		nonEmptyHand = new Hand(someCards);
 		emptyHand = new Hand();
+		cardsToBeMerged = new ArrayList<>();
 	}
 
 	@Test
-	public void sizeIsAlwaysZeroForEmptyHand() {
-		assertThat(emptyHand.size(), is(0));
-	}
-
-	@Test
-	public void sizeReflectsNumberOfCardsForNonEmptyHand() {
+	public void sizeReflectsNumberOfCardsInHand() {
 		assertThat(nonEmptyHand.size(), is(nonEmptyHand.listAllCards().size()));
+	}
+
+	@Test
+	public void sizeIsZeroForEmptyHand() {
+		assertThat(emptyHand.size(), is(0));
 	}
 
 	@Test
@@ -63,62 +61,108 @@ public class HandTest {
 	}
 
 	@Test
-	public void shufflingDoesNothingForEmptyHand() {
-		emptyHand.shuffle();
-	}
-
-	@Test
-	public void shufflingOfNonEmptyHandChangesOrderOfCards() {
+	public void shufflingChangesOrderOfCards() {
 		ImmutableList<Card> orderOfCardsBeforeShuffling = nonEmptyHand.listAllCards();
 		nonEmptyHand.shuffle();
 		ImmutableList<Card> orderOfCardsAfterShuffling = nonEmptyHand.listAllCards();
 		assertThat(orderOfCardsBeforeShuffling, is(not(orderOfCardsAfterShuffling)));
 	}
 
+	@Test
+	public void shufflingEmptyHandHasNoEffect() {
+		ImmutableList<Card> orderOfCardsBeforeShuffling = emptyHand.listAllCards();
+		emptyHand.shuffle();
+		ImmutableList<Card> orderOfCardsAfterShuffling = emptyHand.listAllCards();
+		assertThat(orderOfCardsBeforeShuffling, is(orderOfCardsAfterShuffling));
+	}
+
 	@Test(expected = OutOfCardsException.class)
-	public void cardCanNeverBeDrawnFromEmptyHand() {
-		emptyHand.drawCard();
+	public void cannotDrawCardsMoreThanSizeOfHand() {
+		nonEmptyHand.drawCards(nonEmptyHand.size() + 1);
+		fail();
+	}
+
+	@Test(expected = OutOfCardsException.class)
+	public void cannotDrawAnyCardFromEmptyHand() {
+		emptyHand.drawCards(1);
+		fail();
+	}
+
+	@Test(expected = OutOfCardsException.class)
+	public void cannotDrawLessThanZeroCardsFromHand() {
+		nonEmptyHand.drawCards(-1);
 		fail();
 	}
 
 	@Test
-	public void cardDrawnFromNonEmptyHandIsRemoved() {
-		nonEmptyHand.shuffle();
-		Card theCard = nonEmptyHand.drawCard();
-		assertThat(nonEmptyHand.listAllCards(), not(hasItem(theCard)));
+	public void drawingZeroCardsFromHandHasNoEffect() {
+		int countOfCards = nonEmptyHand.size();
+		List<Card> cardsDrawn = nonEmptyHand.drawCards(0);
+
+		assertThat(cardsDrawn, is(empty()));
+		assertThat(nonEmptyHand.size(), is(countOfCards));
 	}
 
 	@Test
-	public void allCardsCanBeDrawnFromNonEmptyHand() {
+	public void cardsDrawnFromHandAreRemoved() {
 		nonEmptyHand.shuffle();
-		while (nonEmptyHand.hasMoreCards()) {
-			nonEmptyHand.drawCard();
-		}
-		assertThat(nonEmptyHand.listAllCards(), hasSize(0));
+		List<Card> cardsDrawn = nonEmptyHand.drawCards(1);
+		assertThat(nonEmptyHand.listAllCards(), not(hasItem(cardsDrawn.get(0))));
 	}
 
 	@Test
-	public void cardCanAlwaysBeReturnedToEmptyHand() {
+	public void allCardsCanBeDrawnFromHand() {
+		int countOfCards = nonEmptyHand.size();
+		List<Card> cardsDrawn = nonEmptyHand.drawCards(countOfCards);
+
+		assertThat(nonEmptyHand.hasMoreCards(), is(false));
+		assertThat(cardsDrawn, hasSize(countOfCards));
+	}
+
+	@Test
+	public void cardsAreDrawnFromFrontOfHand() {
+		nonEmptyHand.shuffle();
+		List<Card> cardsAtFront = nonEmptyHand.listAllCards().subList(0, 3);
+		List<Card> cardsDrawn = nonEmptyHand.drawCards(3);
+
+		assertThat(cardsAtFront, is(cardsDrawn));
+	}
+
+	@Test
+	public void mergingEmptyCardListToHandHasNoEffect() {
+		int countOfCards = nonEmptyHand.size();
+
+		nonEmptyHand.mergeCards(cardsToBeMerged);
+		assertThat(nonEmptyHand.size(), is(countOfCards));
+	}
+
+	@Test
+	public void cardsCanBeMergedToEmptyHand() {
 		Card theCard = new Card(Rank.ACE, Suit.SPADES);
-		emptyHand.returnCard(theCard);
+		cardsToBeMerged.add(theCard);
+
+		emptyHand.mergeCards(cardsToBeMerged);
 		assertThat(emptyHand.listAllCards(), hasItem(theCard));
 	}
 
 	@Test(expected = DuplicateCardException.class)
-	public void cardCannotBeReturnedToNonEmptyHandWhenItAlreadyExists() {
+	public void cannotMergeCardsToHandIfThereAreAnyDuplicates() {
 		Card theCard = new Card(Rank.ACE, Suit.SPADES);
+		cardsToBeMerged.add(theCard);
 		assertThat(nonEmptyHand.listAllCards(), hasItem(theCard));
-		nonEmptyHand.returnCard(theCard);
+
+		nonEmptyHand.mergeCards(cardsToBeMerged);
 		fail();
 	}
 
 	@Test
-	public void cardReturnedToNonEmptyHandIsAddedWhenItDoesNotExist() {
+	public void cardsMergedToHandAreAdded() {
 		nonEmptyHand.shuffle();
-		Card theCard = nonEmptyHand.drawCard();
-		assertThat(nonEmptyHand.listAllCards(), not(hasItem(theCard)));
+		List<Card> cardsDrawn = nonEmptyHand.drawCards(3);
+		int countOfCards = nonEmptyHand.size();
 
-		nonEmptyHand.returnCard(theCard);
-		assertThat(nonEmptyHand.listAllCards(), hasItem(theCard));
+		nonEmptyHand.mergeCards(cardsDrawn);
+		assertThat(nonEmptyHand.size(), is(countOfCards + 3));
+		assertThat(nonEmptyHand.listAllCards(), hasItems(cardsDrawn.get(0), cardsDrawn.get(1), cardsDrawn.get(2)));
 	}
 }

@@ -1,4 +1,4 @@
-package com.games.cards.war.rules;
+package com.games.cards.war;
 
 import com.games.cards.domain.Card;
 import com.games.cards.domain.enumerations.Rank;

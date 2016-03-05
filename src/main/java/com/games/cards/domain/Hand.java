@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by Nirdh on 05-03-2016.
@@ -30,27 +31,25 @@ public class Hand {
 		Collections.shuffle(collectionOfCards);
 	}
 
-	public Card drawCard() {
+	public List<Card> drawCards(int count) {
 		try {
-			return collectionOfCards.remove(0);
-		} catch (IndexOutOfBoundsException e) {
+			List<Card> cards = new ArrayList<>(collectionOfCards.subList(0, count));
+			collectionOfCards.subList(0, count).clear();
+			return cards;
+		} catch (IndexOutOfBoundsException | IllegalArgumentException e) {
 			throw new OutOfCardsException();
 		}
 	}
 
-	public boolean removeCard(Card theCard) {
-		try {
-			return collectionOfCards.remove(theCard);
-		} catch (Exception e) {
-			return false;
-		}
-	}
+	public void mergeCards(List<Card> cards) {
+		List<Card> cardsToBeMerged = cards.parallelStream().
+				filter(theCard -> !collectionOfCards.contains(theCard))
+				.collect(Collectors.toList());
 
-	public void returnCard(Card theCard) {
-		if (collectionOfCards.contains(theCard)) {
+		if (cardsToBeMerged.size() != cards.size()) {
 			throw new DuplicateCardException();
 		}
-		collectionOfCards.add(theCard);
+		collectionOfCards.addAll(cardsToBeMerged);
 	}
 
 	public boolean hasMoreCards() {
