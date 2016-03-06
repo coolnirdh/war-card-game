@@ -31,34 +31,30 @@ public class Card implements Comparable<Card> {
 	}
 
 	public int compareTo(Card otherCard) {
-		int suitComparison = suit.compareTo(otherCard.getSuit());
-		if (suitComparison == 0) {
-			return rank.compareTo(otherCard.getRank());
-		}
-		return suitComparison;
+		return this.getWeight() - otherCard.getWeight();
 	}
 
-	@Override
-	public String toString() {
-		return rank.getLabel().concat(suit.getSymbol());
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null)
-		{
-			return false;
-		}
-		if (getClass() != obj.getClass())
-		{
-			return false;
-		}
-		final Card otherCard = (Card) obj;
-		return Objects.equals(this.rank, otherCard.rank) && Objects.equals(this.suit, otherCard.suit);
+	public int getWeight() {
+		return (rank.getWeight() - 1) * Suit.values().length + suit.getWeight();
 	}
 
 	@Override
 	public int hashCode() {
 		return Objects.hash(this.rank, this.suit);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		try {
+			final Card otherCard = (Card) obj;
+			return Objects.equals(this.rank, otherCard.rank) && Objects.equals(this.suit, otherCard.suit);
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	@Override
+	public String toString() {
+		return rank.getLabel().concat(suit.getSymbol());
 	}
 }

@@ -9,6 +9,6 @@ import java.util.Comparator;
  */
 public class CardComparator implements Comparator<Card> {
 	public int compare(Card theCard, Card otherCard) {
-		return theCard.getRank().getValue() - otherCard.getRank().getValue();
+		return theCard.getRank().getWeight() - otherCard.getRank().getWeight();
 	}
 }

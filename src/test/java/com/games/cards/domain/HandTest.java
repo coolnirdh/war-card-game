@@ -165,4 +165,15 @@ public class HandTest {
 		assertThat(nonEmptyHand.size(), is(countOfCards + 3));
 		assertThat(nonEmptyHand.listAllCards(), hasItems(cardsDrawn.get(0), cardsDrawn.get(1), cardsDrawn.get(2)));
 	}
+
+	@Test
+	public void cardsAreMergedToBackOfHand() {
+		nonEmptyHand.shuffle();
+		List<Card> cardsDrawn = nonEmptyHand.drawCards(3);
+
+		nonEmptyHand.mergeCards(cardsDrawn);
+		List<Card> orderOfCardsAfterMerge = nonEmptyHand.listAllCards();
+		int countOfCards = orderOfCardsAfterMerge.size();
+		assertThat(orderOfCardsAfterMerge.subList(countOfCards - 3, countOfCards), is(cardsDrawn));
+	}
 }
