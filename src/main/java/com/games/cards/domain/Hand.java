@@ -42,7 +42,7 @@ public class Hand {
 	}
 
 	public void mergeCards(List<Card> cards) {
-		List<Card> cardsToBeMerged = cards.parallelStream().
+		List<Card> cardsToBeMerged = cards.stream().
 				filter(theCard -> !collectionOfCards.contains(theCard))
 				.collect(Collectors.toList());
 

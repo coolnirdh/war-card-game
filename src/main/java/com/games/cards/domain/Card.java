@@ -19,28 +19,28 @@ public class Card implements Comparable<Card> {
 	}
 
 	public Rank getRank() {
-		return this.rank;
+		return rank;
 	}
 
 	public Suit getSuit() {
-		return this.suit;
+		return suit;
 	}
 
 	public Color getColor() {
-		return this.suit.getColor();
-	}
-
-	public int compareTo(Card otherCard) {
-		return this.getWeight() - otherCard.getWeight();
+		return suit.getColor();
 	}
 
 	public int getWeight() {
 		return (rank.getWeight() - 1) * Suit.values().length + suit.getWeight();
 	}
 
+	public int compareTo(Card otherCard) {
+		return this.getWeight() - otherCard.getWeight();
+	}
+
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.rank, this.suit);
+		return Objects.hash(rank, suit);
 	}
 
 	@Override
