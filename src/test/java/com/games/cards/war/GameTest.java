@@ -5,6 +5,7 @@ import com.games.cards.domain.Deck;
 import com.games.cards.domain.enumerations.Rank;
 import com.games.cards.domain.enumerations.Suit;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.fail;
 
 /**
  * Created by Nirdh on 08-03-2016.
@@ -289,10 +291,75 @@ public class GameTest {
 		assertThat(player1.showAllCardsInHand(), hasSize(3));
 	}
 
+	@Test(expected = RuntimeException.class)
+	public void gameCanEndWithADrawWhenAllPlayersAreBustedDuringWar() {
+		Deck deck = new Deck();
+		List<Card> cards = deck.listAllCards();
+		player1.collectCards(cards.subList(0, 13));
+		player2.collectCards(cards.subList(13, 26));
+		player3.collectCards(cards.subList(26, 39));
+		player4.collectCards(cards.subList(39, 52));
+
+		game.setPlayers(new ArrayList<>(Arrays.asList(player1, player2, player3, player4)));
+		game.play();
+		fail();
+	}
+
 	@Test
-	public void fairGameMustProduceOneWinner() {
-		game = new Game(new ArrayList<>(Arrays.asList(player1, player2, player3, player4)));
+	public void gameShouldNormallyProduceOneWinner() {
+		Deck deck = new Deck();
+		List<Card> cards = deck.listAllCards();
+		player1.collectCards(cards.subList(0, 5));
+		player2.collectCards(cards.subList(5, 10));
+		player3.collectCards(cards.subList(10, 15));
+		player4.collectCards(cards.subList(15, 20));
+		player1.collectCards(cards.subList(20, 25));
+		player2.collectCards(cards.subList(25, 30));
+		player3.collectCards(cards.subList(30, 35));
+		player4.collectCards(cards.subList(35, 40));
+		player1.collectCards(cards.subList(40, 43));
+		player2.collectCards(cards.subList(43, 46));
+		player3.collectCards(cards.subList(46, 49));
+		player4.collectCards(cards.subList(49, 52));
+
+		game.setPlayers(new ArrayList<>(Arrays.asList(player1, player2, player3, player4)));
 		Player winner = game.play();
-		assertThat(winner, isA(Player.class));
+		assertThat(winner, is(player4));
+	}
+
+	@Test(timeout = 60000)
+	@Ignore("Runs into a deadlock")
+	public void gameCanEndInADeadlock() {
+		List<Card> cards = this.getCardsFromStringRepresentationOfDeck("6♢, K♡, 7♡, 4♣, 7♠, 6♠, A♢, 6♣, 4♢, 5♠, Q♣, 10♢, A♠, K♣, J♠, 2♡, J♡, A♡, 6♡, K♢, 4♡, 8♠, 5♡, 7♣, 3♣, 3♡, 8♢, 10♣, 9♠, 8♣, 5♢, 2♢, Q♢, J♣, 2♣, 3♠, 9♢, J♢, A♣, 8♡, 10♡, 10♠, K♠, Q♡, 4♠, 9♡, 5♣, Q♠, 3♢, 2♠, 7♢, 9♣");
+		for (int i = 0; i < 52; i = i + 2) {
+			player1.collectCards(cards.subList(i, i + 1));
+			player2.collectCards(cards.subList(i + 1, i + 2));
+		}
+
+		game.setPlayers(new ArrayList<>(Arrays.asList(player1, player2)));
+		Player winner = game.play();
+		assertThat(winner, is(player1));
+	}
+
+	private List<Card> getCardsFromStringRepresentationOfDeck(String deck) {
+		List<Card> cards = new ArrayList<>();
+		List<String> cardRepresentations = Arrays.asList(deck.split(", "));
+		for (String cardRepresentation : cardRepresentations) {
+			String rankLabel = cardRepresentation.substring(0, cardRepresentation.length() - 1);
+			String suitSymbol = cardRepresentation.substring(cardRepresentation.length() - 1);
+
+			for (Rank rank : Rank.values()) {
+				if (rankLabel.equals(rank.getLabel())) {
+					for (Suit suit : Suit.values()) {
+						if (suitSymbol.equals(suit.getSymbol())) {
+							cards.add(new Card(rank, suit));
+							break;
+						}
+					}
+					break;
+				}
+			}
+		}
+		return cards;
 	}
 }

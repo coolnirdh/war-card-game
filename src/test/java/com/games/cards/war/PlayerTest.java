@@ -174,7 +174,7 @@ public class PlayerTest {
 	}
 
 	@Test
-	public void playerIfNotBustedIfThereAreMoreCardsInHand() {
+	public void playerIsNotBustedIfThereAreMoreCardsInHand() {
 		player.collectCards(atLeast4Cards);
 		assertThat(player.isBusted(), is(false));
 	}

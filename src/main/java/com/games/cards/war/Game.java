@@ -3,9 +3,12 @@ package com.games.cards.war;
 import com.games.cards.domain.Card;
 import com.games.cards.domain.Deck;
 import com.google.common.collect.ImmutableList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 /**
@@ -13,6 +16,8 @@ import java.util.stream.Collectors;
  */
 public class Game {
 	public static final int NUMBER_OF_FACE_DOWN_CARDS_IN_WAR = 3;
+
+	private final Logger logger = LoggerFactory.getLogger(Game.class);
 
 	private List<Player> players;
 	private ImmutableList<Player> allPlayers;
@@ -22,32 +27,36 @@ public class Game {
 		this.dealCards();
 	}
 
-	public Player play() {
-		while(players.size() > 1) {
-			playNextRound();
-		}
-		return players.get(0);
-	}
-
 	protected void setPlayers(List<Player> thePlayers) {
-		if(thePlayers.isEmpty()) {
+		if (thePlayers.isEmpty()) {
 			throw new RuntimeException("Need to have at least one player");
 		}
 		this.players = thePlayers;
+		logger.info("Starting game with {} players", players.size());
 		allPlayers = ImmutableList.copyOf(players);
 	}
 
 	protected void dealCards() {
 		Deck deck = new Deck();
 		deck.shuffle();
+		logger.info("Dealing cards");
 		while (deck.size() >= players.size()) {
 			players.stream().forEach(player -> player.collectCards(deck.drawCards(1)));
 		}
 	}
 
+	public Player play() {
+		while (players.size() > 1) {
+			playNextRound();
+		}
+		return players.get(0);
+	}
+
 	protected void playNextRound() {
+		logger.info("Cards in hand: {}", players);
 		List<Player> winners = this.playBattleAndIdentifyWinners();
 		while (this.isWarDeclaredBetween(winners)) {
+			logger.info("WAR Declared!");
 			winners = this.playWarAndIdentifyWinners();
 		}
 		this.rewardWinner(winners.get(0));
@@ -75,12 +84,21 @@ public class Game {
 	}
 
 	protected void removeBustedPlayers() {
-		players.removeAll(players.stream().filter(Player::isBusted).collect(Collectors.toList()));
+		List<Player> bustedPlayers = players.stream().filter(Player::isBusted).collect(Collectors.toList());
+		players.removeAll(bustedPlayers);
+		if (bustedPlayers.size() > 0) {
+			logger.info("Busted: {}", bustedPlayers);
+		}
 	}
 
 	protected List<Player> identifyWinners() {
 		List<Card> competingCards = this.getCompetingCardsFromAllPlayers();
-		Card highestCard = this.getHighestCard(competingCards);
+		Card highestCard;
+		try {
+			highestCard = this.getHighestCard(competingCards);
+		} catch (NoSuchElementException e) {
+			throw new RuntimeException("It's a draw!");
+		}
 		return this.identifyWinnersBasedOn(highestCard);
 	}
 

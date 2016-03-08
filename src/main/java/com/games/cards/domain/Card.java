@@ -30,12 +30,12 @@ public class Card implements Comparable<Card> {
 		return suit.getColor();
 	}
 
-	public int getWeight() {
-		return (rank.getWeight() - 1) * Suit.values().length + suit.getWeight();
-	}
-
 	public int compareTo(Card otherCard) {
 		return this.getWeight() - otherCard.getWeight();
+	}
+
+	public int getWeight() {
+		return (rank.getWeight() - 1) * Suit.values().length + suit.getWeight();
 	}
 
 	@Override
