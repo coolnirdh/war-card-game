@@ -56,7 +56,7 @@ public class Game {
 		logger.info("Cards in hand: {}", players);
 		List<Player> winners = this.playBattleAndIdentifyWinners();
 		while (this.isWarDeclaredBetween(winners)) {
-			logger.info("WAR Declared!");
+			logger.warn("WAR Declared!");
 			winners = this.playWarAndIdentifyWinners();
 		}
 		this.rewardWinner(winners.get(0));
@@ -87,12 +87,13 @@ public class Game {
 		List<Player> bustedPlayers = players.stream().filter(Player::isBusted).collect(Collectors.toList());
 		players.removeAll(bustedPlayers);
 		if (bustedPlayers.size() > 0) {
-			logger.info("Busted: {}", bustedPlayers);
+			logger.warn("Busted: {}", bustedPlayers);
 		}
 	}
 
 	protected List<Player> identifyWinners() {
 		List<Card> competingCards = this.getCompetingCardsFromAllPlayers();
+		logger.debug("Competing cards: " + competingCards);
 		Card highestCard;
 		try {
 			highestCard = this.getHighestCard(competingCards);

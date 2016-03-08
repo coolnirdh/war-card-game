@@ -59,7 +59,7 @@ public class Player {
 		try {
 			cardsAtStake.addAll(hand.drawCards(numberOfFaceDownCards + 1));
 		} catch (OutOfCardsException e) {
-			logger.info("Last chance for {}, run out of cards during WAR!", name);
+			logger.warn("Last chance for {}, ran out of cards during WAR!", name);
 			cardsAtStake.addAll(hand.drawCards(hand.size()));
 		}
 	}
