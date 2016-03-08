@@ -23,8 +23,8 @@ public class Hand {
 		this.setCollectionOfCards(theCollectionOfCards);
 	}
 
-	public void setCollectionOfCards(List<Card> collectionOfCards) {
-		this.collectionOfCards = collectionOfCards;
+	public void setCollectionOfCards(List<Card> theCollectionOfCards) {
+		this.collectionOfCards = theCollectionOfCards;
 	}
 
 	public void shuffle() {

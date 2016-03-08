@@ -34,6 +34,14 @@ public class Player {
 		return cardsAtStake;
 	}
 
+	public Card getCompetingCard() {
+		try {
+			return cardsAtStake.get(cardsAtStake.size() - 1);
+		} catch (IndexOutOfBoundsException e) {
+			throw new OutOfCardsException();
+		}
+	}
+
 	public void collectCards(List<Card> cardsCollected) {
 		hand.mergeCards(cardsCollected);
 	}

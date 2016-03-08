@@ -155,6 +155,20 @@ public class PlayerTest {
 	}
 
 	@Test
+	public void competingCardIsLatestCardAddedToCardsAtStake() {
+		player.collectCards(atLeast4Cards);
+		player.playBattle();
+		player.playWar(1);
+		assertThat(player.getCompetingCard(), is(atLeast4Cards.get(2)));
+	}
+
+	@Test(expected = OutOfCardsException.class)
+	public void cannotGetCompetingCardWhenThereAreNoCardsAtStake() {
+		player.getCompetingCard();
+		fail();
+	}
+
+	@Test
 	public void playerIsBustedIfThereAreNoMoreCardsInHand() {
 		assertThat(player.isBusted(), is(true));
 	}
